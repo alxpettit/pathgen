@@ -6,6 +6,9 @@ set(CMAKE_CXX_STANDARD 14)
 
 find_package(Boost 1.57.0 COMPONENTS program_options REQUIRED)
 
+# probably a terrible way of doing this, but oh well.
+add_definitions( -DBOOST_ALL_DYN_LINK )
+
 if(Boost_FOUND)
 
     message(STATUS "Boost_INCLUDE_DIRS: ${Boost_INCLUDE_DIRS}")
