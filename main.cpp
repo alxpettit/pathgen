@@ -48,11 +48,12 @@ public:
     }
 };
 
-PathGen pathGen = PathGen("PATH");
+PathGen *pathGen;
+po::options_description *desc;
 
 void handleAddToPath(const std::vector<std::string>& paths_to_add) {
     for (const auto& path: paths_to_add) {
-        pathGen.addToPath(path);
+        pathGen->addToPath(path);
     }
 }
 
@@ -60,20 +61,32 @@ void handleSelectPathType(std::string type_str) {
     boost::algorithm::to_lower(type_str);
     // TODO: replace with map
     if (type_str == "posix") {
-
+        pathGen->path_format = POSIX;
     } else if (type_str == "fish") {
-
+        pathGen->path_format = FISH;
     } else {
         std::cerr<<"Eh... what type is that? I only understand 'posix' and 'fish'!" << std::endl;
         exit(1);
     }
 }
 
-int main(int argc, char** argv) {
+void handleHelp(bool value) {
+    if (value) {
+        desc->print(std::cout);
+        exit(0);
+    }
+}
 
-    po::options_description desc("Allowed options");
-    desc.add_options()
-        ("help,h", "Show brief usage message")
+int main(int argc, char** argv) {
+    pathGen = new PathGen("PATH");
+    desc = new po::options_description("Allowed options");
+
+    desc->add_options()
+        (
+                "help,h",
+                po::bool_switch()->notifier(&handleHelp),
+                "Show brief usage message"
+        )
         (
                 "add-to-path,a",
                 po::value<std::vector<std::string>>()->required()->notifier(&handleAddToPath),
@@ -87,15 +100,16 @@ int main(int argc, char** argv) {
          );
 
     po::variables_map args;
-    po::store(po::parse_command_line(argc, argv, desc),args);
+    po::store(po::parse_command_line(argc, argv, *desc),args);
 
     try {
         po::notify(args);
     } catch (std::exception& e){
         std::cerr<<"Error encountered: "<<e.what()<<std::endl;
+        desc->print(std::cerr);
         return 1;
     }
 
-    std::cout << pathGen.genPath() << std::endl;
+    std::cout << pathGen->genPath() << std::endl;
     return 0;
 }

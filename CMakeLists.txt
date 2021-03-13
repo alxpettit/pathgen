@@ -8,6 +8,9 @@ find_package(Boost 1.57.0 COMPONENTS program_options REQUIRED)
 
 # probably a terrible way of doing this, but oh well.
 add_definitions( -DBOOST_ALL_DYN_LINK )
+# I've been told that this slows code down, but I don't think it's really a concern for this application.
+# (also my tests show that the program isn't noticeably faster anyway)
+add_definitions( -Os )
 
 if(Boost_FOUND)
 
